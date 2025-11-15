@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FaArrowLeft, FaLink } from "react-icons/fa";
 import { IoCalendarOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
-import { formatMemberSinceDate } from "../../utils/index.js";
+import { formatMemberSinceDate } from "../../utils/date/index.js";
 import Posts from "../../components/common/Posts.jsx";
 import EditProfileModal from "./EditProfileModal.jsx";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton.jsx";
