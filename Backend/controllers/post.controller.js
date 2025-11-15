@@ -21,10 +21,17 @@ export const createPost = async (req, res) => {
 			img = uploadedResponse.secure_url;
 		}
 
+		// --- ADDED: Hashtag Parsing ---
+		const hashtagRegex = /#(\w+)/g;
+		const hashtags = text.match(hashtagRegex) || [];
+		// --- END ---
+
 		const newPost = new Post({
 			user: userId,
 			text,
 			img,
+			// ADDED: Save parsed hashtags
+			hashtags: hashtags.map((tag) => tag.substring(1).toLowerCase()),
 		});
 
 		await newPost.save();
@@ -79,8 +86,13 @@ export const commentOnPost = async (req, res) => {
 
 		post.comments.push(comment);
 		await post.save();
+		
+		// Return only the updated post, not all posts
+		const updatedPost = await Post.findById(postId)
+			.populate({ path: "user", select: "-password" })
+			.populate({ path: "comments.user", select: "-password" });
 
-		res.status(200).json(post);
+		res.status(200).json(updatedPost);
 	} catch (error) {
 		console.log("Error in commentOnPost controller: ", error);
 		res.status(500).json({ error: "Internal server error" });
@@ -113,12 +125,15 @@ export const likeUnlikePost = async (req, res) => {
 			await User.updateOne({ _id: userId }, { $push: { likedPosts: postId } });
 			await post.save();
 
-			const notification = new Notification({
-				from: userId,
-				to: post.user,
-				type: "like",
-			});
-			await notification.save();
+			// Only send notification if liking someone else's post
+			if (post.user.toString() !== userId.toString()) {
+				const notification = new Notification({
+					from: userId,
+					to: post.user,
+					type: "like",
+				});
+				await notification.save();
+			}
 
 			const updatedLikes = post.likes;
 			res.status(200).json(updatedLikes);
@@ -128,6 +143,118 @@ export const likeUnlikePost = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
+
+// --- NEW BOOKMARK FUNCTIONS ---
+
+export const toggleBookmark = async (req, res) => {
+	try {
+		const userId = req.user._id;
+		const { id: postId } = req.params;
+
+		const user = await User.findById(userId);
+		if (!user) return res.status(404).json({ error: "User not found" });
+
+		const post = await Post.findById(postId);
+		if (!post) return res.status(404).json({ error: "Post not found" });
+
+		const isBookmarked = user.bookmarkedPosts.includes(postId);
+
+		if (isBookmarked) {
+			// Unbookmark
+			await User.updateOne({ _id: userId }, { $pull: { bookmarkedPosts: postId } });
+			user.bookmarkedPosts.pull(postId); // Update local copy
+			res.status(200).json(user.bookmarkedPosts); // Send updated array
+		} else {
+			// Bookmark
+			await User.updateOne({ _id: userId }, { $push: { bookmarkedPosts: postId } });
+			user.bookmarkedPosts.push(postId); // Update local copy
+			res.status(200).json(user.bookmarkedPosts); // Send updated array
+		}
+	} catch (error) {
+		console.log("Error in toggleBookmark controller: ", error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const getBookmarkedPosts = async (req, res) => {
+	try {
+		const userId = req.user._id;
+
+		const user = await User.findById(userId);
+		if (!user) return res.status(404).json({ error: "User not found" });
+
+		const bookmarkedPosts = await Post.find({ _id: { $in: user.bookmarkedPosts } })
+			.sort({ createdAt: -1 }) // Show newest first
+			.populate({
+				path: "user",
+				select: "-password",
+			})
+			.populate({
+				path: "comments.user",
+				select: "-password",
+			});
+
+		res.status(200).json(bookmarkedPosts);
+	} catch (error) {
+		console.log("Error in getBookmarkedPosts controller: ", error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+// --- END BOOKMARK FUNCTIONS ---
+
+// --- REPLACED TRENDING FUNCTION ---
+// Replaced the JS-based function with a more performant MongoDB Aggregation
+export const getTrendingTopics = async (req, res) => {
+	try {
+		// 1. Calculate the timestamp for 24 hours ago
+		const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+		// 2. Use MongoDB Aggregation
+		const trending = await Post.aggregate([
+			{
+				// Find posts created in the last 24 hours with at least one hashtag
+				$match: {
+					createdAt: { $gte: twentyFourHoursAgo },
+					hashtags: { $exists: true, $ne: [] },
+				},
+			},
+			{
+				// Separate each hashtag into its own document
+				$unwind: "$hashtags",
+			},
+			{
+				// Group by the hashtag and count occurrences
+				$group: {
+					_id: "$hashtags",
+					count: { $sum: 1 },
+				},
+			},
+			{
+				// Sort by the highest count
+				$sort: { count: -1 },
+			},
+			{
+				// Return only the top 5
+				$limit: 5,
+			},
+			{
+				// Remap the output to be more friendly
+				$project: {
+					_id: 0,
+					tag: "$_id",
+					posts: "$count",
+				},
+			},
+		]);
+
+		res.status(200).json(trending);
+	} catch (error) {
+		res.status(500).json({ error: "Failed to fetch trending topics" });
+		console.error("Error in getTrendingTopics: ", error);
+	}
+};
+// --- END TRENDING FUNCTION ---
 
 export const getAllPosts = async (req, res) => {
 	try {

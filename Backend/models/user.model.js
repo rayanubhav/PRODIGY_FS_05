@@ -59,10 +59,22 @@ const userSchema = new mongoose.Schema(
 				default: [],
 			},
 		],
+		// ADDED: bookmarkedPosts array
+		bookmarkedPosts: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Post",
+				default: [],
+			},
+		],
 	},
 	{ timestamps: true }
 );
 
 const User = mongoose.model("User", userSchema);
+
+// ADDED: Database Indexes for Performance
+userSchema.index({ followers: 1 }); // For suggestions
+userSchema.index({ bio: "text" }); // For bio search
 
 export default User;

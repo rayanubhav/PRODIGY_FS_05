@@ -1,3 +1,219 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Base Transition for All Elements */
+* {
+  @apply transition-colors duration-200;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Dark Mode Defaults */
+html.dark {
+  @apply bg-dark-bg text-white;
+  color-scheme: dark;
+}
+
+/* Light Mode - BETTER CONTRAST */
+html {
+  @apply bg-white text-gray-900;
+  color-scheme: light;
+}
+
+body {
+  @apply font-sans;
+  font-family: "Inter", sans-serif;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Poppins", sans-serif;
+  @apply font-bold;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-surface;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  @apply bg-brand-primary rounded-full hover:bg-brand-primary-hover;
+}
+
+html ::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+html ::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400;
+}
+
+/* Glass Effect - Valid classes only */
+.glass {
+  @apply backdrop-blur-lg bg-opacity-10;
+}
+
+/* Card Styles - LIGHT THEME FIX */
+.card-base {
+  @apply relative overflow-hidden rounded-brand border;
+  @apply dark:bg-dark-card dark:border-dark-border;
+  @apply bg-white border-gray-200; /* Light mode classes replaced */
+  @apply shadow-glass transition-all duration-300;
+}
+
+.card-base:hover {
+  @apply shadow-glow;
+}
+
+/* Button Base Styles */
+.btn-base {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full;
+  @apply font-medium transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary;
+}
+
+.btn-primary {
+  @apply btn-base bg-brand-primary text-white;
+  @apply hover:bg-brand-primary-hover hover:shadow-glow;
+  @apply active:scale-95;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply btn-base dark:bg-dark-surface dark:text-white dark:border dark:border-dark-border;
+  @apply bg-gray-100 text-gray-900 border border-gray-300; /* Light mode classes replaced */
+  @apply hover:shadow-md;
+  @apply active:scale-95;
+}
+
+.btn-ghost {
+  @apply btn-base dark:text-white text-gray-900; /* Light mode replaced */
+  @apply hover:dark:bg-dark-surface hover:bg-gray-100; /* Light mode replaced */
+  @apply active:scale-95;
+}
+
+/* Input Styles - LIGHT THEME FIX */
+.input-base {
+  @apply w-full px-4 py-2 rounded-brand;
+  @apply dark:bg-dark-surface dark:border-dark-border dark:text-white;
+  @apply bg-gray-50 border-gray-300 text-gray-900; /* Light mode replaced */
+  @apply border focus:outline-none focus:ring-2 focus:ring-brand-primary;
+  @apply focus:border-transparent;
+  @apply placeholder:dark:text-gray-500 placeholder:text-gray-400; /* Light replaced */
+  @apply transition-all duration-200;
+}
+
+/* Badge Styles */
+.badge-base {
+  @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium;
+  @apply dark:bg-dark-surface dark:text-white;
+  @apply bg-gray-100 text-gray-900; /* Light replaced */
+}
+
+.badge-success {
+  @apply badge-base dark:bg-green-900 dark:text-green-200 bg-green-100 text-green-800; /* Light replaced */
+}
+
+.badge-primary {
+  @apply badge-base dark:bg-purple-900 dark:text-purple-200 bg-purple-100 text-purple-800; /* Light replaced */
+}
+
+/* Loading Shimmer */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  background-size: 200% 100%;
+  @apply animate-shimmer;
+}
+
+html.dark .shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+}
+
+/* Smooth Page Transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-enter {
+  @apply animate-fade-in;
+}
+
+/* Link Hover Effect */
+a {
+  @apply cursor-pointer;
+}
+
+a:not(.no-hover) {
+  @apply hover:text-brand-primary transition-colors duration-200;
+}
+
+/* Focus Visible for Accessibility */
+*:focus-visible {
+  @apply outline-none ring-2 ring-brand-primary;
+}
+
+/* Backdrop Blur Support */
+@supports (backdrop-filter: blur(10px)) {
+  .glass {
+    @apply backdrop-blur-lg;
+  }
+}
+
+/* Gradient Text */
+.gradient-text {
+  @apply bg-gradient-to-r from-brand-primary to-brand-accent bg-clip-text text-transparent;
+}
+
+/* Glow Effect */
+.glow {
+  @apply shadow-glow;
+}
+
+.glow-lg {
+  @apply shadow-glow-lg;
+}
+
+/* Light theme specific backgrounds */
+html:not(.dark) {
+  background-color: #ffffff;
+}
+
+/* Ensure light theme cards are distinct */
+html:not(.dark) .card-base {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+
+html:not(.dark) .dark\:bg-dark-surface {
+  background-color: #f9fafb;
+}

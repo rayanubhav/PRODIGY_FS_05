@@ -1,31 +1,31 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-
-import HomePage from "./pages/home/HomePage";
-import LoginPage from "./pages/auth/login/LoginPage";
-import SignUpPage from "./pages/auth/signup/SignUpPage";
-import NotificationPage from "./pages/notification/NotificationPage";
-import ProfilePage from "./pages/profile/ProfilePage";
-
-import Sidebar from "./components/common/Sidebar";
-import RightPanel from "./components/common/RightPanel";
-
-import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
-import LoadingSpinner from "./components/common/LoadingSpinner";
+import { Toaster } from "react-hot-toast";
 
-function App() {
+import HomePage from "./pages/home/HomePage.jsx";
+import LoginPage from "./pages/auth/login/LoginPage.jsx";
+import SignUpPage from "./pages/auth/signup/SignUpPage.jsx";
+import NotificationPage from "./pages/notification/NotificationPage.jsx";
+import ProfilePage from "./pages/profile/ProfilePage.jsx";
+
+import Navbar from "./components/common/Navbar.jsx";
+import Sidebar from "./components/common/Sidebar.jsx";
+import RightPanel from "./components/common/RightPanel.jsx";
+import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
+
+import { ThemeProvider } from "./contexts/ThemeContext.jsx";
+import BookmarksPage from "./pages/bookmarks/BookmarksPage.jsx";
+import HelpPage from "./pages/help/HelpPage.jsx";
+
+function AppContent() {
 	const { data: authUser, isLoading } = useQuery({
-		// we use queryKey to give a unique name to our query and refer to it later
 		queryKey: ["authUser"],
 		queryFn: async () => {
 			try {
 				const res = await fetch("/api/auth/me");
 				const data = await res.json();
 				if (data.error) return null;
-				if (!res.ok) {
-					throw new Error(data.error || "Something went wrong");
-				}
-				console.log("authUser is here:", data);
+				if (!res.ok) throw new Error(data.error || "Something went wrong");
 				return data;
 			} catch (error) {
 				throw new Error(error);
@@ -36,26 +36,61 @@ function App() {
 
 	if (isLoading) {
 		return (
-			<div className='h-screen flex justify-center items-center'>
-				<LoadingSpinner size='lg' />
+			<div className="h-screen flex justify-center items-center dark:bg-dark-bg bg-white">
+				<LoadingSpinner size="lg" />
 			</div>
 		);
 	}
 
 	return (
-		<div className='flex max-w-6xl mx-auto'>
-			{/* Common component, bc it's not wrapped with Routes */}
-			{authUser && <Sidebar />}
-			<Routes>
-				<Route path='/' element={authUser ? <HomePage /> : <Navigate to='/login' />} />
-				<Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to='/' />} />
-				<Route path='/signup' element={!authUser ? <SignUpPage /> : <Navigate to='/' />} />
-				<Route path='/notifications' element={authUser ? <NotificationPage /> : <Navigate to='/login' />} />
-				<Route path='/profile/:username' element={authUser ? <ProfilePage /> : <Navigate to='/login' />} />
-			</Routes>
-			{authUser && <RightPanel />}
-			<Toaster />
-		</div>
+		<>
+			{authUser && <Navbar />}
+			<div className="flex min-h-screen dark:bg-dark-bg bg-white">
+				{authUser && <Sidebar />}
+				{/* This main tag centralizes page layout padding for all pages */}
+				<main className="flex-1 pt-16 pb-20 md:pb-0">
+					<Routes>
+						<Route
+							path="/"
+							element={authUser ? <HomePage /> : <Navigate to="/login" />}
+						/>
+						<Route
+							path="/login"
+							element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+						/>
+						<Route
+							path="/signup"
+							element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+						/>
+						<Route
+							path="/notifications"
+							element={authUser ? <NotificationPage /> : <Navigate to="/login" />}
+						/>
+						<Route
+							path="/profile/:username"
+							element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+						/>
+						<Route
+							path="/bookmarks"
+							element={authUser ? <BookmarksPage /> : <Navigate to="/login" />}
+						/>
+						<Route path="/help" element={<HelpPage />} />
+					</Routes>
+				</main>
+				{authUser && <RightPanel />}
+			</div>
+			{/* This BottomNav is duplicated by Sidebar.jsx, so we remove it. */}
+			{/* {authUser && <BottomNav />} */}
+			<Toaster position="top-right" />
+		</>
+	);
+}
+
+function App() {
+	return (
+		<ThemeProvider>
+			<AppContent />
+		</ThemeProvider>
 	);
 }
 

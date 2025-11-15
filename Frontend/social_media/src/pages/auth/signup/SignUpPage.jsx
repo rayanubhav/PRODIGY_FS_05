@@ -1,132 +1,179 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
-
-import XSvg from "../../../components/svgs/X";
-
-import { MdOutlineMail } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
-import { MdPassword } from "react-icons/md";
-import { MdDriveFileRenameOutline } from "react-icons/md";
+import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 const SignUpPage = () => {
-	const [formData, setFormData] = useState({
-		email: "",
-		username: "",
-		fullName: "",
-		password: "",
-	});
+    const [formData, setFormData] = useState({
+        email: "",
+        username: "",
+        fullName: "",
+        password: "",
+    });
+    const queryClient = useQueryClient();
 
-	const queryClient = useQueryClient();
+    const { mutate: signup, isPending, isError, error } = useMutation({
+        mutationFn: async (data) => {
+            const res = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || "Signup failed");
+            return result;
+        },
+        onSuccess: () => {
+            toast.success("Account created! Welcome to Pulse! 🎉");
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
 
-	const { mutate, isError, isPending, error } = useMutation({
-		mutationFn: async ({ email, username, fullName, password }) => {
-			try {
-				const res = await fetch("/api/auth/signup", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ email, username, fullName, password }),
-				});
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!formData.email || !formData.username || !formData.fullName || !formData.password) {
+            toast.error("Please fill in all fields");
+            return;
+        }
+        signup(formData);
+    };
 
-				const data = await res.json();
-				if (!res.ok) throw new Error(data.error || "Failed to create account");
-				console.log(data);
-				return data;
-			} catch (error) {
-				console.error(error);
-				throw error;
-			}
-		},
-		onSuccess: () => {
-			toast.success("Account created successfully");
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-			{
-				/* Added this line below, after recording the video. I forgot to add this while recording, sorry, thx. */
-			}
-			queryClient.invalidateQueries({ queryKey: ["authUser"] });
-		},
-	});
+    return (
+        <div className="min-h-screen dark:bg-gradient-to-br dark:from-dark-bg dark:via-dark-surface dark:to-dark-bg light:bg-gradient-to-br light:from-white light:via-light-surface light:to-white flex items-center justify-center px-4 py-8">
+            <div className="w-full max-w-md animate-fade-in">
+                {/* Logo & Header */}
+                <div className="text-center mb-8">
+                    <div className="inline-block">
+                        <div className="text-5xl font-bold gradient-text animate-pulse-glow mb-2">
+                            <span role="img" aria-label="logo">
+                                🚀
+                            </span>
+                        </div>
+                        <h1 className="text-4xl font-bold gradient-text">Join Pulse</h1>
+                    </div>
+                    <p className="dark:text-gray-400 light:text-gray-600 mt-2">
+                        Become part of the community
+                    </p>
+                </div>
 
-	const handleSubmit = (e) => {
-		e.preventDefault(); // page won't reload
-		mutate(formData);
-	};
+                {/* Form Card */}
+                <div className="card-base p-6 md:p-8">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Email */}
+                        <div>
+                            <label className="block dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
+                                Email Address
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                placeholder="you@example.com"
+                                className="input-base"
+                                required
+                            />
+                        </div>
 
-	const handleInputChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
-	};
+                        {/* Username & Full Name */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
+                                    Username
+                                </label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                    placeholder="username"
+                                    className="input-base"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName}
+                                    onChange={handleChange}
+                                    placeholder="John Doe"
+                                    className="input-base"
+                                    required
+                                />
+                            </div>
+                        </div>
 
-	return (
-		<div className='max-w-screen-xl mx-auto flex h-screen px-10'>
-			<div className='flex-1 hidden lg:flex items-center  justify-center'>
-				<XSvg className='lg:w-2/3 fill-white' />
-			</div>
-			<div className='flex-1 flex flex-col justify-center items-center'>
-				<form className='lg:w-2/3  mx-auto md:mx-20 flex gap-4 flex-col' onSubmit={handleSubmit}>
-					<XSvg className='w-24 lg:hidden fill-white' />
-					<h1 className='text-4xl font-extrabold text-white'>Join today.</h1>
-					<label className='input input-bordered rounded flex items-center gap-2'>
-						<MdOutlineMail />
-						<input
-							type='email'
-							className='grow'
-							placeholder='Email'
-							name='email'
-							onChange={handleInputChange}
-							value={formData.email}
-						/>
-					</label>
-					<div className='flex gap-4 flex-wrap'>
-						<label className='input input-bordered rounded flex items-center gap-2 flex-1'>
-							<FaUser />
-							<input
-								type='text'
-								className='grow '
-								placeholder='Username'
-								name='username'
-								onChange={handleInputChange}
-								value={formData.username}
-							/>
-						</label>
-						<label className='input input-bordered rounded flex items-center gap-2 flex-1'>
-							<MdDriveFileRenameOutline />
-							<input
-								type='text'
-								className='grow'
-								placeholder='Full Name'
-								name='fullName'
-								onChange={handleInputChange}
-								value={formData.fullName}
-							/>
-						</label>
-					</div>
-					<label className='input input-bordered rounded flex items-center gap-2'>
-						<MdPassword />
-						<input
-							type='password'
-							className='grow'
-							placeholder='Password'
-							name='password'
-							onChange={handleInputChange}
-							value={formData.password}
-						/>
-					</label>
-					<button className='btn rounded-full btn-primary text-white'>
-						{isPending ? "Loading..." : "Sign up"}
-					</button>
-					{isError && <p className='text-red-500'>{error.message}</p>}
-				</form>
-				<div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
-					<p className='text-white text-lg'>Already have an account?</p>
-					<Link to='/login'>
-						<button className='btn rounded-full btn-primary text-white btn-outline w-full'>Sign in</button>
-					</Link>
-				</div>
-			</div>
-		</div>
-	);
+                        {/* Password */}
+                        <div>
+                            <label className="block dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
+                                Password
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                placeholder="Min. 6 characters"
+                                className="input-base"
+                                required
+                            />
+                        </div>
+
+                        {/* Error Message */}
+                        {isError && (
+                            <div className="p-3 dark:bg-red-900/20 light:bg-red-100/20 border dark:border-red-800 light:border-red-300 rounded-lg">
+                                <p className="text-red-500 text-sm">{error?.message}</p>
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={isPending}
+                            className="btn-primary w-full mt-6 py-3"
+                        >
+                            {isPending ? "Creating Account..." : "Create Account"}
+                        </button>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="relative my-6">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full dark:border-dark-border border-light-border border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="dark:bg-dark-card light:bg-light-card dark:text-gray-400 light:text-gray-600 px-2">
+                                Already have an account?
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Login Link */}
+                    <Link to="/login">
+                        <button type="button" className="btn-secondary w-full py-3">
+                            Sign In
+                        </button>
+                    </Link>
+                </div>
+
+                {/* Footer */}
+                <p className="text-center dark:text-gray-500 light:text-gray-600 text-sm mt-6">
+                    By signing up, you agree to our Terms & Privacy Policy
+                </p>
+            </div>
+        </div>
+    );
 };
+
 export default SignUpPage;

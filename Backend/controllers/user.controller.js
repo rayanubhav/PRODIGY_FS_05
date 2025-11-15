@@ -60,27 +60,29 @@ export const followUnfollowUser = async (req, res) => {
 	}
 };
 
+// UPDATED: getSuggestedUsers to be more intelligent
 export const getSuggestedUsers = async (req, res) => {
 	try {
 		const userId = req.user._id;
+		const user = await User.findById(userId);
 
-		const usersFollowedByMe = await User.findById(userId).select("following");
-
-		const users = await User.aggregate([
-			{
-				$match: {
-					_id: { $ne: userId },
-				},
+		// Step 1: Get users the current user doesn't follow
+		const suggestedUsers = await User.find({
+			_id: {
+				$nin: [
+					user._id, // Exclude self
+					...user.following, // Exclude already following
+				],
 			},
-			{ $sample: { size: 10 } },
-		]);
+		})
+			.select("username fullName profileImg bio followers following")
+			.limit(10) // Limit to 10 suggestions
+			.sort({ followers: -1 }); // Sort by most followers
 
-		// 1,2,3,4,5,6,
-		const filteredUsers = users.filter((user) => !usersFollowedByMe.following.includes(user._id));
-		const suggestedUsers = filteredUsers.slice(0, 4);
+		// Step 2: Add relevance score (optional advanced feature as noted)
+		// ... future implementation of bio keyword matching ...
 
-		suggestedUsers.forEach((user) => (user.password = null));
-
+		// Step 3: Return top suggestions
 		res.status(200).json(suggestedUsers);
 	} catch (error) {
 		console.log("Error in getSuggestedUsers: ", error.message);
