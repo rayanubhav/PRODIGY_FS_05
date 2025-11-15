@@ -11,7 +11,7 @@ import {
 	FaBookmark,
 } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
-import { formatPostDate } from "../../utils/index.js";
+import { formatPostDate } from "../../utils/date/index.js";
 import LoadingSpinner from "./LoadingSpinner.jsx";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || "";
