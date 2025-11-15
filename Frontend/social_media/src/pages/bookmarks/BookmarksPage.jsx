@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { FaArrowLeft, FaBookmark } from "react-icons/fa";
-import Posts from "../../components/common/Posts"; // This component isn't used here, but Post is
-import Post from "../../components/common/Post"; // Import the Post component
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import Post from "../../components/common/Post.jsx";
+import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const BookmarksPage = () => {
 	const { data: bookmarkedPosts, isLoading } = useQuery({
 		queryKey: ["bookmarks"],
 		queryFn: async () => {
-			const res = await fetch("/api/posts/bookmarks");
+			const res = await fetch(`${API_URL}/api/posts/bookmarks`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to load bookmarks");
 			return data;
@@ -48,7 +49,6 @@ const BookmarksPage = () => {
 
 				{!isLoading && bookmarkedPosts?.length > 0 && (
 					<div>
-						{/* Render each bookmarked post using the Post component */}
 						{bookmarkedPosts.map((post) => (
 							<Post key={post._id} post={post} />
 						))}

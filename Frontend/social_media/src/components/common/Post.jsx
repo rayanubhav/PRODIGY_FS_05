@@ -11,17 +11,17 @@ import {
 	FaBookmark,
 } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
-import { formatPostDate } from "../../utils/date/index.js"; // Corrected import path
-import LoadingSpinner from "./LoadingSpinner.jsx"; // Corrected import path
+import { formatPostDate } from "../../utils/index.js";
+import LoadingSpinner from "./LoadingSpinner.jsx";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
 	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 	const queryClient = useQueryClient();
 
-	// Ensure post and post.user exist before accessing properties
 	if (!post || !post.user) {
-		// Render a skeleton or null while post data is conforming
 		return <div className="card-base m-3 p-4"><LoadingSpinner /></div>;
 	}
 
@@ -33,7 +33,7 @@ const Post = ({ post }) => {
 
 	const { mutate: deletePost, isPending: isDeleting } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`/api/posts/${post._id}`, { method: "DELETE" });
+			const res = await fetch(`${API_URL}/api/posts/${post._id}`, { method: "DELETE" });
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to delete");
 			return data;
@@ -41,23 +41,20 @@ const Post = ({ post }) => {
 		onSuccess: () => {
 			toast.success("Post deleted");
 			queryClient.invalidateQueries({ queryKey: ["posts"] });
-			queryClient.invalidateQueries({ queryKey: ["bookmarks"] }); // Invalidate bookmarks
+			queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
 		},
 	});
 
 	const { mutate: likePost, isPending: isLiking } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`/api/posts/like/${post._id}`, { method: "POST" });
+			const res = await fetch(`${API_URL}/api/posts/like/${post._id}`, { method: "POST" });
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
 		},
 		onSuccess: (updatedLikes) => {
-			// Update the cache for all post queries
 			queryClient.setQueriesData({ queryKey: ["posts"] }, (oldData) => {
 				if (!oldData) return oldData;
-				
-				// Handle both array (feed) and object (single post) cases
 				if(Array.isArray(oldData)) {
 					return oldData.map((p) => (p._id === post._id ? { ...p, likes: updatedLikes } : p));
 				}
@@ -71,18 +68,16 @@ const Post = ({ post }) => {
 
 	const { mutate: bookmarkPost, isPending: isSaving } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`/api/posts/bookmark/${post._id}`, { method: "POST" });
+			const res = await fetch(`${API_URL}/api/posts/bookmark/${post._id}`, { method: "POST" });
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
 		},
 		onSuccess: (updatedBookmarks) => {
-			// Update authUser in cache
 			queryClient.setQueryData(["authUser"], (oldUser) => ({
 				...oldUser,
 				bookmarkedPosts: updatedBookmarks,
 			}));
-			// Invalidate bookmarks query to refetch
 			queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
 			toast.success(isSaved ? "Post unbookmarked" : "Post bookmarked! 📌");
 		},
@@ -93,23 +88,20 @@ const Post = ({ post }) => {
 
 	const { mutate: commentOnPost, isPending: isCommenting } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`/api/posts/comment/${post._id}`, {
+			const res = await fetch(`${API_URL}/api/posts/comment/${post._id}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ text: comment }),
 			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to comment");
-			return data; // Return the updated post
+			return data;
 		},
 		onSuccess: (updatedPost) => {
 			toast.success("Comment posted!");
-			setComment(""); // Clear input
-			
-			// Update the post in the cache
+			setComment("");
 			queryClient.setQueriesData({ queryKey: ["posts"] }, (oldData) => {
 				if (!oldData) return oldData;
-				
 				if(Array.isArray(oldData)) {
 					return oldData.map((p) => (p._id === post._id ? updatedPost : p));
 				}
@@ -134,9 +126,7 @@ const Post = ({ post }) => {
 
 	return (
 		<article className="card-base m-3 p-4 hover:shadow-glow group transition-all">
-			{/* Header - Fixed Size Avatar */}
 			<div className="flex gap-3 mb-3 items-start">
-				{/* Avatar - CONSISTENT SIZE */}
 				<Link to={`/profile/${postOwner.username}`} className="flex-shrink-0">
 					<img
 						src={postOwner.profileImg || "/avatar-placeholder.png"}
@@ -145,7 +135,6 @@ const Post = ({ post }) => {
 					/>
 				</Link>
 
-				{/* User Info */}
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2 flex-wrap">
 						<Link
@@ -164,7 +153,6 @@ const Post = ({ post }) => {
 					</div>
 				</div>
 
-				{/* Delete Button */}
 				{isMyPost && (
 					<button
 						onClick={() => deletePost()}
@@ -176,14 +164,11 @@ const Post = ({ post }) => {
 				)}
 			</div>
 
-			{/* Content - FOCUS HERE */}
 			<div className="mb-3 pl-0">
-				{/* Text Content */}
 				<p className="dark:text-gray-100 light:text-gray-900 text-sm leading-relaxed mb-3">
 					{post.text}
 				</p>
 
-				{/* Image - CONSTRAINED SIZE */}
 				{post.img && (
 					<img
 						src={post.img}
@@ -193,16 +178,13 @@ const Post = ({ post }) => {
 				)}
 			</div>
 
-			{/* Stats Row */}
 			<div className="flex gap-4 text-xs dark:text-gray-500 light:text-gray-500 py-2 border-t border-b dark:border-dark-border border-light-border mb-2">
 				<span>{post.comments?.length || 0} comments</span>
 				<span>•</span>
 				<span>{post.likes?.length || 0} likes</span>
 			</div>
 
-			{/* Interactions - COMPACT */}
 			<div className="flex justify-between items-center">
-				{/* Comment Button */}
 				<button
 					onClick={() => document.getElementById("comments_modal" + post._id)?.showModal()}
 					className="flex items-center gap-2 p-2 flex-1 justify-center rounded hover:dark:bg-blue-900/20 hover:light:bg-blue-100/20 hover:text-brand-accent transition-all group/comment text-xs dark:text-gray-500 light:text-gray-500"
@@ -212,7 +194,6 @@ const Post = ({ post }) => {
 					<span className="hidden sm:inline">Reply</span>
 				</button>
 
-				{/* Repost Button */}
 				<button
 					className="flex items-center gap-2 p-2 flex-1 justify-center rounded hover:dark:bg-green-900/20 hover:light:bg-green-100/20 hover:text-brand-success transition-all group/repost text-xs dark:text-gray-500 light:text-gray-500"
 					title="Repost"
@@ -221,7 +202,6 @@ const Post = ({ post }) => {
 					<span className="hidden sm:inline">Repost</span>
 				</button>
 
-				{/* Like Button */}
 				<button
 					onClick={handleLikePost}
 					disabled={isLiking}
@@ -240,7 +220,6 @@ const Post = ({ post }) => {
 					</span>
 				</button>
 
-				{/* Bookmark Button */}
 				<button
 					onClick={handleBookmarkPost}
 					disabled={isSaving}
@@ -260,7 +239,6 @@ const Post = ({ post }) => {
 				</button>
 			</div>
 
-			{/* Comments Modal */}
 			<dialog id={`comments_modal${post._id}`} className="modal">
 				<div className="modal-box card-base dark:border-dark-border light:border-light-border w-full max-w-md">
 					<h3 className="font-bold text-lg mb-4">💬 Comments</h3>
@@ -292,9 +270,7 @@ const Post = ({ post }) => {
 									</div>
 									<p className="text-sm mt-1 dark:text-gray-300 light:text-gray-700">
 										{c.text}
-										Do not change the response.
 									</p>
-									
 								</div>
 							</div>
 						))}

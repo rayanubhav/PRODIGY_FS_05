@@ -1,6 +1,8 @@
-import Post from "./Post";
-import PostSkeleton from "../skeletons/PostSkeleton";
+import Post from "./Post.jsx";
+import PostSkeleton from "../skeletons/PostSkeleton.jsx";
 import { useQuery } from "@tanstack/react-query";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const Posts = ({ feedType, username, userId }) => {
 	const getPostEndpoint = () => {
@@ -24,11 +26,11 @@ const Posts = ({ feedType, username, userId }) => {
 		refetch,
 		isRefetching,
 	} = useQuery({
-		queryKey: ["posts", feedType, username, userId], // Dynamic queryKey
+		queryKey: ["posts", feedType, username, userId],
 		queryFn: async () => {
 			try {
-				const POST_ENDPOINT = getPostEndpoint(); // Endpoint is determined inside queryFn
-				const res = await fetch(POST_ENDPOINT);
+				const POST_ENDPOINT = getPostEndpoint();
+				const res = await fetch(`${API_URL}${POST_ENDPOINT}`);
 				const data = await res.json();
 
 				if (!res.ok) {
@@ -41,12 +43,6 @@ const Posts = ({ feedType, username, userId }) => {
 			}
 		},
 	});
-
-	// useEffect is no longer needed as React Query
-	// handles refetching based on the dynamic queryKey
-	// useEffect(() => {
-	// 	refetch();
-	// }, [feedType, refetch, username]);
 
 	return (
 		<>

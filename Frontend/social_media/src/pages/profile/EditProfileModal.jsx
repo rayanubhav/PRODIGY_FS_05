@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
-import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
+import useUpdateUserProfile from "../../hooks/useUpdateUserProfile.jsx";
 
 const EditProfileModal = ({ authUser }) => {
 	const [formData, setFormData] = useState({
@@ -36,12 +36,9 @@ const EditProfileModal = ({ authUser }) => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			// Wait for the update to complete
 			await updateProfile(formData);
-			// Only close modal on success
 			document.getElementById("edit_profile_modal")?.close();
 		} catch (error) {
-			// Error is already handled by useUpdateUserProfile hook's toast
 			console.error("Failed to update profile:", error);
 		}
 	};
@@ -142,7 +139,7 @@ const EditProfileModal = ({ authUser }) => {
 								name="link"
 								value={formData.link}
 								onChange={handleInputChange}
-								placeholder="https://example.com"
+								placeholder="https"
 								className="input-base"
 							/>
 						</div>

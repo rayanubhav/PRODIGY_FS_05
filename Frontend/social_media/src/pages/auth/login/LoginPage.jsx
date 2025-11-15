@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import { MdOutlineMail, MdPassword } from "react-icons/md"; // Removed to fix build error
+import { MdOutlineMail, MdPassword } from "react-icons/md";
 import { toast } from "react-hot-toast";
+
+// ADDED: API URL for deployment
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const LoginPage = () => {
 	const [formData, setFormData] = useState({ username: "", password: "" });
@@ -10,7 +13,8 @@ const LoginPage = () => {
 
 	const { mutate: login, isPending, isError, error } = useMutation({
 		mutationFn: async ({ username, password }) => {
-			const res = await fetch("/api/auth/login", {
+			// UPDATED: Use full API_URL
+			const res = await fetch(`${API_URL}/api/auth/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ username, password }),
@@ -44,7 +48,6 @@ const LoginPage = () => {
 				<div className="text-center mb-8">
 					<div className="inline-block">
 						<div className="text-5xl font-bold gradient-text animate-pulse-glow mb-2">
-							{/* Placeholder emoji */}
 							<span role="img" aria-label="logo">
 								✨
 							</span>
@@ -65,15 +68,15 @@ const LoginPage = () => {
 								Username or Email
 							</label>
 							<div className="relative">
-								{/* <MdOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" /> */}
+								<MdOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 								<input
 									type="text"
 									name="username"
 									value={formData.username}
 									onChange={handleChange}
 									placeholder="Enter your username"
-									// FIX: Removed pl-10 as icon is removed
-									className="input-base"
+									// FIXED: Added px-4 pl-10 for icon padding
+									className="input-base px-4 pl-10"
 									required
 								/>
 							</div>
@@ -85,15 +88,15 @@ const LoginPage = () => {
 								Password
 							</label>
 							<div className="relative">
-								{/* <MdPassword className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" /> */}
+								<MdPassword className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 								<input
 									type="password"
 									name="password"
 									value={formData.password}
 									onChange={handleChange}
 									placeholder="Enter your password"
-									// FIX: Removed pl-10 as icon is removed
-									className="input-base"
+									// FIXED: Added px-4 pl-10 for icon padding
+									className="input-base px-4 pl-10"
 									required
 								/>
 							</div>

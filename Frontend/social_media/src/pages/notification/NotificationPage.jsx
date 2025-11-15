@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FaUser, FaHeart, FaTrash } from "react-icons/fa";
 import { IoSettingsOutline } from "react-icons/io5";
 import { toast } from "react-hot-toast";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const NotificationPage = () => {
 	const queryClient = useQueryClient();
@@ -11,7 +13,7 @@ const NotificationPage = () => {
 	const { data: notifications, isLoading } = useQuery({
 		queryKey: ["notifications"],
 		queryFn: async () => {
-			const res = await fetch("/api/notifications");
+			const res = await fetch(`${API_URL}/api/notifications`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to load notifications");
 			return data;
@@ -20,7 +22,7 @@ const NotificationPage = () => {
 
 	const { mutate: deleteNotifications, isPending: isDeleting } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch("/api/notifications", { method: "DELETE" });
+			const res = await fetch(`${API_URL}/api/notifications`, { method: "DELETE" });
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

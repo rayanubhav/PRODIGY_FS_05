@@ -7,6 +7,8 @@ import { BiLogOut, BiSolidMessageSquareAdd } from "react-icons/bi";
 import { MdHelpOutline } from "react-icons/md";
 import { toast } from "react-hot-toast";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 const Sidebar = () => {
 	const location = useLocation();
 	const queryClient = useQueryClient();
@@ -14,7 +16,7 @@ const Sidebar = () => {
 
 	const { mutate: logout } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch("/api/auth/logout", { method: "POST" });
+			const res = await fetch(`${API_URL}/api/auth/logout`, { method: "POST" });
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

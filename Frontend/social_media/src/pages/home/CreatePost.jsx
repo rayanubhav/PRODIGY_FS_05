@@ -5,6 +5,8 @@ import { CiImageOn } from "react-icons/ci";
 import { BsEmojiSmileFill } from "react-icons/bs";
 import { IoCloseSharp } from "react-icons/io5";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 const CreatePost = () => {
 	const [text, setText] = useState("");
 	const [img, setImg] = useState(null);
@@ -18,7 +20,7 @@ const CreatePost = () => {
 
 	const { mutate: createPost, isPending } = useMutation({
 		mutationFn: async ({ text, img }) => {
-			const res = await fetch("/api/posts/create", {
+			const res = await fetch(`${API_URL}/api/posts/create`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ text, img }),

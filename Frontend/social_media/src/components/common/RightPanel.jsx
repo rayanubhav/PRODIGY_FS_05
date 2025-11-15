@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FaChevronDown } from "react-icons/fa";
-import useFollow from "../../hooks/useFollow";
-import LoadingSpinner from "./LoadingSpinner";
+import useFollow from "../../hooks/useFollow.js";
+import LoadingSpinner from "./LoadingSpinner.jsx";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const RightPanel = () => {
 	const [isExpanded, setIsExpanded] = useState(false);
@@ -10,7 +12,7 @@ const RightPanel = () => {
 	const { data: suggestedUsers, isLoading } = useQuery({
 		queryKey: ["suggestedUsers"],
 		queryFn: async () => {
-			const res = await fetch("/api/users/suggested");
+			const res = await fetch(`${API_URL}/api/users/suggested`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

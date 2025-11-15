@@ -7,6 +7,8 @@ import useFollow from "../../hooks/useFollow.js";
 import { BiSearch } from "react-icons/bi";
 import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 const HomePage = () => {
 	const [feedType, setFeedType] = useState("forYou");
 
@@ -14,7 +16,7 @@ const HomePage = () => {
 	const { data: suggestedUsers, isLoading: isLoadingSuggested } = useQuery({
 		queryKey: ["suggestedUsers"],
 		queryFn: async () => {
-			const res = await fetch("/api/users/suggested");
+			const res = await fetch(`${API_URL}/api/users/suggested`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
@@ -25,7 +27,7 @@ const HomePage = () => {
 	const { data: stats, isLoading: isLoadingStats } = useQuery({
 		queryKey: ["stats"],
 		queryFn: async () => {
-			const res = await fetch("/api/stats/counts");
+			const res = await fetch(`${API_URL}/api/stats/counts`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
@@ -36,7 +38,7 @@ const HomePage = () => {
 	const { data: trending, isLoading: isLoadingTrending } = useQuery({
 		queryKey: ["trending"],
 		queryFn: async () => {
-			const res = await fetch("/api/posts/trending");
+			const res = await fetch(`${API_URL}/api/posts/trending`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

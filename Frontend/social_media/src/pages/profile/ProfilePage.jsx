@@ -4,12 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { FaArrowLeft, FaLink } from "react-icons/fa";
 import { IoCalendarOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
-import { formatMemberSinceDate } from "../../utils/date"; // Assuming date.js or index.js
-import Posts from "../../components/common/Posts";
-import EditProfileModal from "./EditProfileModal";
-import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
-import useFollow from "../../hooks/useFollow";
-import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
+import { formatMemberSinceDate } from "../../utils/index.js";
+import Posts from "../../components/common/Posts.jsx";
+import EditProfileModal from "./EditProfileModal.jsx";
+import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton.jsx";
+import useFollow from "../../hooks/useFollow.js";
+import useUpdateUserProfile from "../../hooks/useUpdateUserProfile.jsx";
+
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const ProfilePage = () => {
 	const [coverImg, setCoverImg] = useState(null);
@@ -28,9 +30,9 @@ const ProfilePage = () => {
 		refetch,
 		isRefetching,
 	} = useQuery({
-		queryKey: ["userProfile", username], // Dynamic queryKey
+		queryKey: ["userProfile", username],
 		queryFn: async () => {
-			const res = await fetch(`/api/users/profile/${username.toLowerCase()}`);
+			const res = await fetch(`${API_URL}/api/users/profile/${username.toLowerCase()}`);
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
@@ -53,12 +55,6 @@ const ProfilePage = () => {
 			reader.readAsDataURL(file);
 		}
 	};
-
-	// useEffect is no longer needed as React Query handles refetching
-	// based on the dynamic queryKey
-	// useEffect(() => {
-	// 	refetch();
-	// }, [username, refetch]);
 
 	if (isLoading || isRefetching) return <ProfileHeaderSkeleton />;
 	if (!user)

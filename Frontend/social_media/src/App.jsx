@@ -17,12 +17,16 @@ import { ThemeProvider } from "./contexts/ThemeContext.jsx";
 import BookmarksPage from "./pages/bookmarks/BookmarksPage.jsx";
 import HelpPage from "./pages/help/HelpPage.jsx";
 
+// Get the backend URL from the .env file
+const API_URL = import.meta.env.VITE_API_BASE_URL || "";
+
 function AppContent() {
 	const { data: authUser, isLoading } = useQuery({
 		queryKey: ["authUser"],
 		queryFn: async () => {
 			try {
-				const res = await fetch("/api/auth/me");
+				// UPDATED: Use the full API_URL
+				const res = await fetch(`${API_URL}/api/auth/me`);
 				const data = await res.json();
 				if (data.error) return null;
 				if (!res.ok) throw new Error(data.error || "Something went wrong");
