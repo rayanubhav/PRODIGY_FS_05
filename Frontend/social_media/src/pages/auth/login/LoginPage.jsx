@@ -68,7 +68,6 @@ const LoginPage = () => {
 								Username or Email
 							</label>
 							<div className="relative">
-								<MdOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 								<input
 									type="text"
 									name="username"
@@ -88,7 +87,6 @@ const LoginPage = () => {
 								Password
 							</label>
 							<div className="relative">
-								<MdPassword className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 								<input
 									type="password"
 									name="password"

@@ -82,7 +82,6 @@ const SignUpPage = () => {
 								Email Address
 							</label>
 							<div className="relative">
-								<MdOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 								<input
 									type="email"
 									name="email"
@@ -102,7 +101,6 @@ const SignUpPage = () => {
 									Username
 								</label>
 								<div className="relative">
-									<FaUser className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400 w-4" />
 									<input
 										type="text"
 										name="username"
@@ -119,7 +117,6 @@ const SignUpPage = () => {
 									Full Name
 								</label>
 								<div className="relative">
-									<MdDriveFileRenameOutline className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 									<input
 										type="text"
 										name="fullName"
@@ -139,7 +136,6 @@ const SignUpPage = () => {
 								Password
 							</label>
 							<div className="relative">
-								<MdPassword className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-gray-500 light:text-gray-400" />
 								<input
 									type="password"
 									name="password"
