@@ -13,11 +13,12 @@ const LoginPage = () => {
 
 	const { mutate: login, isPending, isError, error } = useMutation({
 		mutationFn: async ({ username, password }) => {
-			// UPDATED: Use full API_URL
+			// UPDATED: Use full API_URL and add credentials
 			const res = await fetch(`${API_URL}/api/auth/login`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ username, password }),
+				credentials: "include", // <-- CRITICAL FIX
 			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Login failed");
@@ -68,13 +69,14 @@ const LoginPage = () => {
 								Username or Email
 							</label>
 							<div className="relative">
+								{/* VISUAL FIX: Icon added */}
+								<MdOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-400 light:text-gray-500" />
 								<input
 									type="text"
 									name="username"
 									value={formData.username}
 									onChange={handleChange}
 									placeholder="Enter your username"
-									// FIXED: Added px-4 pl-10 for icon padding
 									className="input-base px-4 pl-10"
 									required
 								/>
@@ -87,13 +89,14 @@ const LoginPage = () => {
 								Password
 							</label>
 							<div className="relative">
+								{/* VISUAL FIX: Icon added */}
+								<MdPassword className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-400 light:text-gray-500" />
 								<input
 									type="password"
 									name="password"
 									value={formData.password}
 									onChange={handleChange}
 									placeholder="Enter your password"
-									// FIXED: Added px-4 pl-10 for icon padding
 									className="input-base px-4 pl-10"
 									required
 								/>

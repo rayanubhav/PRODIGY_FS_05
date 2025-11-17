@@ -22,24 +22,21 @@ cloudinary.config({
 });
 const app = express();
 
+// Trust proxy headers from Render
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
 // --- UPDATED CORS CONFIGURATION ---
-// Define your CORS options
 const corsOptions = {
-	origin: true,
+	// Your Render frontend URL MUST be in the environment variables
+	origin: process.env.FRONTEND_URL || "http://localhost:3000",
 	credentials: true,
-	optionsSuccessStatus: 200, // For legacy browsers
+	optionsSuccessStatus: 200,
 };
 
-// 1. Enable CORS for all requests
+// This one line handles ALL requests, including preflight OPTIONS
 app.use(cors(corsOptions));
-
-// 2. Explicitly handle preflight (OPTIONS) requests
-// This will respond to the browser's "permission slip" request (the 404 error)
-app.options("*", cors(corsOptions));
 // --- END UPDATED CORS ---
 
 const PORT = process.env.PORT || 5000;
@@ -52,7 +49,6 @@ const limiter = rateLimit({
 	legacyHeaders: false,
 });
 
-// Apply limiter *after* CORS handling
 app.use("/api", limiter);
 
 app.use("/api/auth", authRoutes);

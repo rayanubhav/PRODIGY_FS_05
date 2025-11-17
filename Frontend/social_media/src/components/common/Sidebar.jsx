@@ -16,7 +16,10 @@ const Sidebar = () => {
 
 	const { mutate: logout } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`${API_URL}/api/auth/logout`, { method: "POST" });
+			const res = await fetch(`${API_URL}/api/auth/logout`, {
+				method: "POST",
+				credentials: "include", // <-- CRITICAL FIX added
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
@@ -53,7 +56,7 @@ const Sidebar = () => {
 			icon: FaBookmark,
 			outlineIcon: FaRegBookmark,
 			label: "Bookmarks",
-			emoji: "📌",
+			emoji: "🔖",
 		},
 	];
 

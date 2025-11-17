@@ -12,7 +12,9 @@ const RightPanel = () => {
 	const { data: suggestedUsers, isLoading } = useQuery({
 		queryKey: ["suggestedUsers"],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/users/suggested`);
+			const res = await fetch(`${API_URL}/api/users/suggested`, {
+				credentials: "include", // <-- CRITICAL FIX added
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

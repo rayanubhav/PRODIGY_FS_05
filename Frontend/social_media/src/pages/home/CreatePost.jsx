@@ -24,6 +24,7 @@ const CreatePost = () => {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ text, img }),
+				credentials: "include", // <-- CRITICAL FIX
 			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to create post");

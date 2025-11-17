@@ -32,7 +32,9 @@ const ProfilePage = () => {
 	} = useQuery({
 		queryKey: ["userProfile", username],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/users/profile/${username.toLowerCase()}`);
+			const res = await fetch(`${API_URL}/api/users/profile/${username.toLowerCase()}`, {
+				credentials: "include", // <-- CRITICAL FIX
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

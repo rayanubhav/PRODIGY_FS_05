@@ -19,6 +19,31 @@ export const getUserProfile = async (req, res) => {
 	}
 };
 
+export const searchUsers = async (req, res) => {
+	try {
+		const { q: searchQuery } = req.query;
+
+		if (!searchQuery) {
+			return res.status(400).json({ error: "Search query is required" });
+		}
+
+		// Use regex for a case-insensitive search on both username and fullName
+		const users = await User.find({
+			$or: [
+				{ username: { $regex: searchQuery, $options: "i" } },
+				{ fullName: { $regex: searchQuery, $options: "i" } },
+			],
+		})
+			.select("-password -email") // Don't send sensitive info
+			.limit(10); // Limit to 10 results
+
+		res.status(200).json(users);
+	} catch (error) {
+		console.error("Error in searchUsers controller: ", error);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
 export const followUnfollowUser = async (req, res) => {
 	try {
 		const { id } = req.params;

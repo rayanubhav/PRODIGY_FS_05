@@ -26,7 +26,9 @@ function AppContent() {
 		queryFn: async () => {
 			try {
 				// UPDATED: Use the full API_URL
-				const res = await fetch(`${API_URL}/api/auth/me`);
+				const res = await fetch(`${API_URL}/api/auth/me`, {
+					credentials: "include", // <-- CRITICAL FIX added
+				});
 				const data = await res.json();
 				if (data.error) return null;
 				if (!res.ok) throw new Error(data.error || "Something went wrong");

@@ -10,7 +10,9 @@ const BookmarksPage = () => {
 	const { data: bookmarkedPosts, isLoading } = useQuery({
 		queryKey: ["bookmarks"],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/posts/bookmarks`);
+			const res = await fetch(`${API_URL}/api/posts/bookmarks`, {
+				credentials: "include", // <-- CRITICAL FIX
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to load bookmarks");
 			return data;

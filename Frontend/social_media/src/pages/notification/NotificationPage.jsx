@@ -13,7 +13,9 @@ const NotificationPage = () => {
 	const { data: notifications, isLoading } = useQuery({
 		queryKey: ["notifications"],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/notifications`);
+			const res = await fetch(`${API_URL}/api/notifications`, {
+				credentials: "include", // <-- CRITICAL FIX
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error || "Failed to load notifications");
 			return data;
@@ -22,7 +24,10 @@ const NotificationPage = () => {
 
 	const { mutate: deleteNotifications, isPending: isDeleting } = useMutation({
 		mutationFn: async () => {
-			const res = await fetch(`${API_URL}/api/notifications`, { method: "DELETE" });
+			const res = await fetch(`${API_URL}/api/notifications`, {
+				method: "DELETE",
+				credentials: "include", // <-- CRITICAL FIX
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;

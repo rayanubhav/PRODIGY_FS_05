@@ -23,11 +23,12 @@ const SignUpPage = () => {
 
 	const { mutate: signup, isPending, isError, error } = useMutation({
 		mutationFn: async (data) => {
-			// UPDATED: Use full API_URL
+			// UPDATED: Use full API_URL and add credentials
 			const res = await fetch(`${API_URL}/api/auth/signup`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(data),
+				credentials: "include", // <-- CRITICAL FIX
 			});
 			const result = await res.json();
 			if (!res.ok) throw new Error(result.error || "Signup failed");
@@ -82,6 +83,8 @@ const SignUpPage = () => {
 								Email Address
 							</label>
 							<div className="relative">
+								{/* VISUAL FIX: Icon added */}
+								<MdOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-400 light:text-gray-500" />
 								<input
 									type="email"
 									name="email"
@@ -101,6 +104,8 @@ const SignUpPage = () => {
 									Username
 								</label>
 								<div className="relative">
+									{/* VISUAL FIX: Icon added */}
+									<FaUser className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-400 light:text-gray-500" />
 									<input
 										type="text"
 										name="username"
@@ -117,6 +122,8 @@ const SignUpPage = () => {
 									Full Name
 								</label>
 								<div className="relative">
+									{/* VISUAL FIX: Icon added */}
+									<MdDriveFileRenameOutline className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-400 light:text-gray-500" />
 									<input
 										type="text"
 										name="fullName"
@@ -136,6 +143,8 @@ const SignUpPage = () => {
 								Password
 							</label>
 							<div className="relative">
+								{/* VISUAL FIX: Icon added */}
+								<MdPassword className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 dark:text-gray-400 light:text-gray-500" />
 								<input
 									type="password"
 									name="password"
@@ -179,7 +188,6 @@ const SignUpPage = () => {
 
 					{/* Login Link */}
 					<Link to="/login">
-						{/* THIS WAS THE FIX: type="button" instead of type"button" */}
 						<button type="button" className="btn-secondary w-full py-3">
 							Sign In
 						</button>

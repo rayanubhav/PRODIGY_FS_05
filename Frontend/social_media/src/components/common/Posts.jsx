@@ -30,7 +30,9 @@ const Posts = ({ feedType, username, userId }) => {
 		queryFn: async () => {
 			try {
 				const POST_ENDPOINT = getPostEndpoint();
-				const res = await fetch(`${API_URL}${POST_ENDPOINT}`);
+				const res = await fetch(`${API_URL}${POST_ENDPOINT}`, {
+					credentials: "include", // <-- CRITICAL FIX
+				});
 				const data = await res.json();
 
 				if (!res.ok) {

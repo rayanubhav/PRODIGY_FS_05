@@ -15,6 +15,7 @@ const useUpdateUserProfile = () => {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify(formData),
+					credentials: "include", // <-- CRITICAL FIX
 				});
 				const data = await res.json();
 				if (!res.ok) {

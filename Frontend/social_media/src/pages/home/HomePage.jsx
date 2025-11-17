@@ -6,17 +6,24 @@ import CreatePost from "./CreatePost.jsx";
 import useFollow from "../../hooks/useFollow.js";
 import { BiSearch } from "react-icons/bi";
 import LoadingSpinner from "../../components/common/LoadingSpinner.jsx";
+import useDebounce from "../../hooks/useDebounce.js";
+import SearchDropdown from "../../components/common/SearchDropdown.jsx";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const HomePage = () => {
 	const [feedType, setFeedType] = useState("forYou");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+	const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
 	// Fetch "Who to Follow"
 	const { data: suggestedUsers, isLoading: isLoadingSuggested } = useQuery({
 		queryKey: ["suggestedUsers"],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/users/suggested`);
+			const res = await fetch(`${API_URL}/api/users/suggested`, {
+				credentials: "include",
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
@@ -27,7 +34,9 @@ const HomePage = () => {
 	const { data: stats, isLoading: isLoadingStats } = useQuery({
 		queryKey: ["stats"],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/stats/counts`);
+			const res = await fetch(`${API_URL}/api/stats/counts`, {
+				credentials: "include",
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
@@ -38,14 +47,35 @@ const HomePage = () => {
 	const { data: trending, isLoading: isLoadingTrending } = useQuery({
 		queryKey: ["trending"],
 		queryFn: async () => {
-			const res = await fetch(`${API_URL}/api/posts/trending`);
+			const res = await fetch(`${API_URL}/api/posts/trending`, {
+				credentials: "include",
+			});
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			return data;
 		},
 	});
 
+	// Fetch Search Results
+	const { data: searchResults, isLoading: isSearchLoading } = useQuery({
+		queryKey: ["searchUsers", debouncedSearchQuery],
+		queryFn: async () => {
+			if (debouncedSearchQuery.length === 0) return [];
+			const res = await fetch(`${API_URL}/api/users/search?q=${debouncedSearchQuery}`, {
+				credentials: "include",
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "Search failed");
+			return data;
+		},
+		enabled: debouncedSearchQuery.length > 0, // Only run query if search term exists
+	});
+
 	const { follow, isPending } = useFollow();
+
+	const clearSearch = () => {
+		setSearchQuery("");
+	};
 
 	return (
 		<>
@@ -126,13 +156,26 @@ const HomePage = () => {
 
 				{/* Right Sidebar - FIXED (NO SCROLL) */}
 				<div className="lg:w-72 flex flex-col flex-shrink-0 gap-3">
-					{/* Search Bar - FIXED */}
-					<div className="card-base p-3 flex items-center gap-2 flex-shrink-0">
+					{/* Search Bar - Updated */}
+					{/* FIX: Added z-20 to lift this container and its dropdown above siblings */}
+					<div className="card-base p-3 flex items-center gap-2 flex-shrink-0 relative z-20">
 						<BiSearch className="text-brand-accent text-lg flex-shrink-0" />
 						<input
+							id="desktop-search-input" // Added ID for click-outside logic
 							type="text"
-							placeholder="Search..."
+							placeholder="Search users..."
 							className="flex-1 bg-transparent dark:text-white light:text-gray-900 placeholder-gray-500 focus:outline-none text-sm"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							onFocus={() => setIsSearchDropdownOpen(true)}
+						/>
+						{/* Add Search Dropdown */}
+						<SearchDropdown
+							isOpen={isSearchDropdownOpen && searchQuery.length > 0}
+							setIsOpen={setIsSearchDropdownOpen}
+							isLoading={isSearchLoading}
+							results={searchResults}
+							clearSearch={clearSearch}
 						/>
 					</div>
 
@@ -159,13 +202,18 @@ const HomePage = () => {
 												className="flex items-center gap-2 flex-shrink-0"
 											>
 												<img
-													src={user.profileImg || "/avatar-placeholder.png"}
+													src={
+														user.profileImg || "/avatar-placeholder.png"
+													}
 													alt={user.fullName}
 													className="w-8 h-8 rounded-full object-cover"
 												/>
 											</Link>
 											<div className="flex-1 min-w-0">
-												<Link to={`/profile/${user.username}`} className="no-hover">
+												<Link
+													to={`/profile/${user.username}`}
+													className="no-hover"
+												>
 													<p className="font-bold text-xs group-hover:text-brand-primary truncate">
 														{user.fullName}
 													</p>
@@ -211,7 +259,8 @@ const HomePage = () => {
 											#{item.tag}
 										</p>
 										<p className="text-xs dark:text-gray-500 light:text-gray-500">
-											{item.posts.toLocaleString()} post{item.posts > 1 ? "s" : ""}
+											{item.posts.toLocaleString()} post
+											{item.posts > 1 ? "s" : ""}
 										</p>
 									</div>
 								))}
@@ -233,7 +282,9 @@ const HomePage = () => {
 									{stats?.userCount.toLocaleString() || 0}
 								</p>
 							)}
-							<p className="text-xs dark:text-gray-400 light:text-gray-600">Users</p>
+							<p className="text-xs dark:text-gray-400 light:text-gray-600">
+								Users
+							</p>
 						</div>
 						<div className="p-2 dark:bg-dark-surface light:bg-light-surface rounded-lg text-center">
 							{isLoadingStats ? (
@@ -243,7 +294,9 @@ const HomePage = () => {
 									{stats?.postCount.toLocaleString() || 0}
 								</p>
 							)}
-							<p className="text-xs dark:text-gray-400 light:text-gray-600">Posts</p>
+							<p className="text-xs dark:text-gray-400 light:text-gray-600">
+								Posts
+							</p>
 						</div>
 					</div>
 				</div>
