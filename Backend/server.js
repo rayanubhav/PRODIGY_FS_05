@@ -29,7 +29,7 @@ app.use(cookieParser());
 // --- UPDATED CORS CONFIGURATION ---
 // Define your CORS options
 const corsOptions = {
-	origin: process.env.FRONTEND_URL,
+	origin: true,
 	credentials: true,
 	optionsSuccessStatus: 200, // For legacy browsers
 };
