@@ -6,7 +6,6 @@ import postRoutes from "./routes/post.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import statsRoutes from "./routes/stats.routes.js";
 
-// ADDED: Import CORS
 import cors from "cors";
 import dotenv from "dotenv";
 import connectMongoDB from "./db/connectMongoDB.js";
@@ -22,30 +21,38 @@ cloudinary.config({
 	api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 const app = express();
+
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
-// ADDED: Use CORS
-// This allows your frontend (on a different URL) to make requests to this backend
-app.use(
-	cors({
-		// Make sure FRONTEND_URL is set in your Render environment variables
-		origin: process.env.FRONTEND_URL, 
-		credentials: true, // Allows cookies to be sent
-	})
-);
+// --- UPDATED CORS CONFIGURATION ---
+// Define your CORS options
+const corsOptions = {
+	origin: process.env.FRONTEND_URL,
+	credentials: true,
+	optionsSuccessStatus: 200, // For legacy browsers
+};
+
+// 1. Enable CORS for all requests
+app.use(cors(corsOptions));
+
+// 2. Explicitly handle preflight (OPTIONS) requests
+// This will respond to the browser's "permission slip" request (the 404 error)
+app.options("*", cors(corsOptions));
+// --- END UPDATED CORS ---
 
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
 const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // Limit each IP to 100 requests per `windowMs`
+	windowMs: 15 * 60 * 1000,
+	max: 100,
 	standardHeaders: true,
 	legacyHeaders: false,
 });
 
+// Apply limiter *after* CORS handling
 app.use("/api", limiter);
 
 app.use("/api/auth", authRoutes);
